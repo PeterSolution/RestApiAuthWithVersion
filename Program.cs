@@ -53,16 +53,28 @@ builder.Services.AddIdentityCore<IdentityUser>()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ModelDbContext>();
 
+builder.Services.AddSwaggerGen(options =>
+{
+    var provider = builder.Services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
+
+    foreach (var description in provider.ApiVersionDescriptions)
+    {
+        options.SwaggerDoc(
+            description.GroupName,
+            new Microsoft.OpenApi.Models.OpenApiInfo()
+            {
+                Title = $"Your API {description.ApiVersion}",
+                Version = description.ApiVersion.ToString(),
+            });
+    }
+});
+
 builder.Services.AddApiVersioning(opt =>
 {
     opt.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
-    opt.AssumeDefaultVersionWhenUnspecified = true;
     opt.ReportApiVersions = true;
-    opt.ApiVersionReader = ApiVersionReader.Combine(
-        new UrlSegmentApiVersionReader(),
-        new HeaderApiVersionReader("x-api-version"),
-        new MediaTypeApiVersionReader("x-api-version")
-    );
+    opt.ApiVersionReader = new UrlSegmentApiVersionReader();
+
 });
 
 builder.Services.AddVersionedApiExplorer(setup =>
@@ -91,6 +103,11 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddResponseCaching(opt =>
+{
+    opt.MaximumBodySize = 2024;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -102,12 +119,26 @@ if (app.Environment.IsDevelopment())
 }
 
 
-
 app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
 app.UseCors("Allow");
+
+app.UseResponseCaching();
+
+app.Use(async (context, delegatte) =>
+{
+    context.Response.GetTypedHeaders().CacheControl =
+    new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+    {
+        Public = true,
+        MaxAge = TimeSpan.FromMinutes(1)
+    };
+    context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
+    new string[] { "Accept-Encoding" };
+    await delegatte();
+});
 
 app.UseAuthentication();
 

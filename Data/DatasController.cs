@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace CoreApiInNet.Data
 {
     [ApiController]
-    [ApiVersion("1.0")]
+    [ApiVersion("1.0",Deprecated =true)]
     [Route("api/v{version:apiVersion}/datas")]
     public class DatasController : ControllerBase
     {

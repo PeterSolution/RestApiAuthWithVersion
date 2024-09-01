@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace CoreApiInNet.Data
 {
     [ApiController]
-    [ApiVersion("2.0")]
+    [ApiVersion("2.0",Deprecated =true)]
     [Route("api/v{version:apiVersion}/datas")]
     public class DatasV2Controller : ControllerBase
     {
@@ -22,7 +22,7 @@ namespace CoreApiInNet.Data
 
         public ILogger Logger { get; set; }
 
-        public DatasV2Controller(IMapper mapper, InterfaceDataRepository dataRepository,ILogger<DatasV2Controller> logger)
+        public DatasV2Controller(IMapper mapper, InterfaceDataRepository dataRepository,ILogger<DatasController> logger)
         {
 
             this.mapper = mapper;
