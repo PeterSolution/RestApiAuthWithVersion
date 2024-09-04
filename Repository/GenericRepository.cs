@@ -1,19 +1,27 @@
-﻿using CoreApiInNet.Contracts;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using CoreApiInNet.Contracts;
 using CoreApiInNet.Data;
+using CoreApiInNet.Model;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Linq;
 
 namespace CoreApiInNet.Repository
 {
     public class GenericRepository<T> : InterfaceGenericReposotory<T> where T : class
     {
         private readonly ModelDbContext context;
+        public IMapper Mapper { get; }
 
-        public GenericRepository(ModelDbContext context)
+        public GenericRepository(ModelDbContext context,IMapper mapper)
         {
             this.context = context;
+            Mapper = mapper;
         }
+
+
         public async Task<T> AddAsync(T entity)
         {
             await context.AddAsync(entity);
@@ -57,6 +65,23 @@ namespace CoreApiInNet.Repository
             {
                 return await context.Set<T>().FindAsync(id);
             }
+        }
+
+        public async Task<QueryResult<TResult>> GetResultsAsync<TResult>(QueryAntiFlood queryAntiFlood)
+        {
+            var Totalsize = await context.Set<T>().CountAsync();
+            var items=await context.Set<T>()
+                .Skip(queryAntiFlood.StartIndex)
+                .Take(queryAntiFlood.AmountItems)
+                .ProjectTo<TResult>(Mapper.ConfigurationProvider)
+                .ToListAsync();
+            return new QueryResult<TResult>
+            {
+                Items = items,
+                PageNumber = queryAntiFlood.StartIndex,
+                Amount = queryAntiFlood.AmountItems,
+                TotalAmount = Totalsize
+            };
         }
 
         public async Task<IDbContextTransaction> StartTransaction()

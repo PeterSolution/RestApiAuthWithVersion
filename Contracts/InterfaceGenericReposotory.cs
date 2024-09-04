@@ -13,6 +13,7 @@ namespace CoreApiInNet.Contracts
         Task<T> DeleteAsync(int id);
         Task<bool> Exist(int id);
         Task<IDbContextTransaction> StartTransaction();
+        Task<QueryResult<TResult>> GetResultsAsync<TResult>(QueryAntiFlood queryAntiFlood);
     }
     
 }

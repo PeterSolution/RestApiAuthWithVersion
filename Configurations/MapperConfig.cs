@@ -12,6 +12,7 @@ namespace CoreApiInNet.Configurations
         {
             CreateMap<DbModelData, HelpingModelData>().ReverseMap();
             CreateMap<FullDataModel, DbModelData>().ReverseMap();
+            CreateMap<DbModelData, DbModelData>().ReverseMap();
 
             CreateMap<ApiUserDto, IdentityUser>().ReverseMap();
         }

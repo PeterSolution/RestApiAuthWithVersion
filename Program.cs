@@ -10,13 +10,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData;
+
 using System.Text;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -73,8 +76,8 @@ builder.Services.AddApiVersioning(opt =>
 {
     opt.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
     opt.ReportApiVersions = true;
-    opt.ApiVersionReader = new UrlSegmentApiVersionReader();
-
+    opt.ApiVersionReader = new HeaderApiVersionReader("api-version");
+    opt.AssumeDefaultVersionWhenUnspecified = true;
 });
 
 builder.Services.AddVersionedApiExplorer(setup =>
@@ -108,6 +111,12 @@ builder.Services.AddResponseCaching(opt =>
     opt.MaximumBodySize = 2024;
 });
 
+builder.Services.AddControllers().AddOData(opt=> {
+    opt.Select().Filter().OrderBy();
+});
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -133,7 +142,7 @@ app.Use(async (context, delegatte) =>
     new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
     {
         Public = true,
-        MaxAge = TimeSpan.FromMinutes(1)
+        MaxAge = TimeSpan.FromSeconds(30)
     };
     context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
     new string[] { "Accept-Encoding" };

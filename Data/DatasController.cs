@@ -9,6 +9,8 @@ using CoreApiInNet.Model;
 using AutoMapper;
 using CoreApiInNet.Contracts;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Results;
 
 namespace CoreApiInNet.Data
 {
@@ -30,7 +32,7 @@ namespace CoreApiInNet.Data
             Logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
 
@@ -39,6 +41,22 @@ namespace CoreApiInNet.Data
                 return dataRepository.GetAllAsync != null ?
                 Ok(await dataRepository.GetAllAsync()) :
                 Problem("Database is empty.");
+            }
+        }
+        [HttpGet]
+        public async Task<ActionResult<PageResult<DbModelData>>> GetAllInPage([FromQuery] QueryAntiFlood queryAntiFlood)
+        {
+
+            using (var transaction = await dataRepository.StartTransaction())
+            {
+                /*return dataRepository.GetAllAsync != null ?
+                Ok(await dataRepository.GetAllAsync()) :
+                Problem("Database is empty.");*/
+
+                var data = await dataRepository.GetResultsAsync<DbModelData>(queryAntiFlood);
+
+                return Ok(data);
+
             }
         }
 

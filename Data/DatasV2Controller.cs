@@ -9,6 +9,10 @@ using CoreApiInNet.Model;
 using AutoMapper;
 using CoreApiInNet.Contracts;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Routing;
+using Microsoft.AspNetCore.OData.Extensions;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace CoreApiInNet.Data
 {
@@ -31,6 +35,7 @@ namespace CoreApiInNet.Data
         }
 
         [HttpGet]
+        [EnableQuery]
         public async Task<IActionResult> GetAll()
         {
 
