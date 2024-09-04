@@ -5,7 +5,7 @@ Examples:
 
 OData:
 
-![OData](https://github.com/user-attachments/assets/7bf62f60-432c-479f-9e7e-9dba9303f7a3)
+![OData](https://github.com/user-attachments/assets/42cc391e-ca04-4f40-b63b-6872695d1541)
 
 
 Login Authorization
